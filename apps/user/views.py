@@ -29,8 +29,21 @@ class RegisterView(View):
         if not re.match(r'[a-z0-9][\w.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
             return render(request, 'register.html', {'error': '邮箱格式不正确'})
 
+        # 检测用户名是否重复
+        try:
+            user = User.objects.get(username=username, password=password)
+        except User.DoesNotExist:
+            # 用户名不存在
+            user = None
+
+        if user:
+            # 用户名存在
+            return render(request, 'register.html', {'error': '用户名已存在'})
+
         # 业务处理进行注册
         user = User.objects.create_user(username, password, email)
+        user.is_active = 0
+        user.save()
 
         # 注册完跳转到首页
         return redirect(reverse('goods:index'))
