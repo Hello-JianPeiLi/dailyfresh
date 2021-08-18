@@ -14,6 +14,11 @@ from pathlib import Path
 import os
 import sys
 
+if sys.platform == 'win32':
+    password = '123456'
+else:
+    password = 'te666666'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -85,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'dailyfresh',
         'USER': 'root',
-        'PASSWORD': 'te666666',
+        'PASSWORD': password,
         'HOST': 'localhost',
         'PORT': 3306,
     }
@@ -142,3 +147,15 @@ TINYMCE_DEFAULT_CONFIG = {
     'width': 600,
     'height': 400,
 }
+
+# 配置邮件客户端
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 465
+# 发送邮件的邮箱
+EMAIL_HOST_USER = '291075564@qq.com'
+# 在邮箱中设置的客户端授权密码
+EMAIL_HOST_PASSWORD = 'cgodjyfcarsfbiib'
+EMAIL_USE_SSL = True
+# 收件人看到的发件人
+EMAIL_FROM = 'python<291075564@qq.com>'
