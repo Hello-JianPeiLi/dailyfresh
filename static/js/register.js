@@ -55,9 +55,9 @@ $(function(){
 
 	function check_pwd(){
 		var len = $('#pwd').val().length;
-		if(len<8||len>20)
+		if(len<=6||len>20)
 		{
-			$('#pwd').next().html('密码最少8位，最长20位')
+			$('#pwd').next().html('密码最少6位，最长20位')
 			$('#pwd').next().show();
 			error_password = true;
 		}
