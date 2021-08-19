@@ -159,3 +159,6 @@ EMAIL_HOST_PASSWORD = 'cgodjyfcarsfbiib'
 EMAIL_USE_SSL = True
 # 收件人看到的发件人
 EMAIL_FROM = 'python<291075564@qq.com>'
+
+# 设置默认地址
+LOGIN_URL = '/user/login'
