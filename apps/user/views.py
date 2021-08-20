@@ -9,6 +9,7 @@ from dailyfresh import settings
 from django.core.mail import send_mail
 from itsdangerous import SignatureExpired
 from utils.mixin import LoginRequireMixin
+from django.contrib.auth import authenticate, login
 
 
 # from celery_tasks.email_task import send_register_active_email
@@ -20,6 +21,7 @@ class RegisterView(View):
 
     def get(self, request):
         """获取注册页面"""
+
         return render(request, 'register.html')
 
     def post(self, request):
@@ -48,7 +50,8 @@ class RegisterView(View):
             return render(request, 'register.html', {'error': '用户名已存在'})
 
         # 业务处理进行注册
-        user = User.objects.create_user(username, password, email)
+        user = User.objects.create_user(username, email, password)
+        user.set_password(password)
         user.is_active = 0
         user.save()
 
@@ -95,9 +98,43 @@ class LoginView(View):
     """登录页面"""
 
     def get(self, request):
-        return render(request, 'login.html')
+        if 'username' in request.COOKIES:
+            username = request.COOKIES['username']
+        else:
+            username = ''
+        return render(request, 'login.html', {'username': username})
+
+    def post(self, request):
+        username = request.POST.get('username')
+        password = request.POST.get('pwd')
+        if not all([username, password]):
+            return render(request, 'login.html', {'error': '参数缺失'})
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            # 账密正确
+            if user.is_active:
+                # 是否激活
+                response = redirect(reverse('goods:index'))
+                remember = request.POST.get('remember')
+                if remember == 'on':
+                    response.set_cookie('username', user.username, max_age=60)
+                else:
+                    response.delete_cookie('username')
+                login(request, user)
+
+                return response
+            else:
+                return render(request, 'login.html', {'error': '此用户未激活'})
+        else:
+            # 账密错误
+            return render(request, 'login.html', {'error': '账号或密码错误'})
 
 
 class OrderView(LoginRequireMixin, View):
     def get(self, request):
         return render(request, 'user_center_order.html')
+
+
+class IndexView(View):
+    def get(self, request):
+        return render(request, 'index.html')
