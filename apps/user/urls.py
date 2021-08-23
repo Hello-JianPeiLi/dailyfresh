@@ -1,6 +1,5 @@
 from django.urls import path
 from django.conf.urls import url
-
 from apps.user.views import RegisterView, ActiveView, LoginView, IndexView, OrderView
 
 from django.urls import re_path
@@ -12,4 +11,5 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),  # 登录
     path('index/', IndexView.as_view(), name='index'),  # 登录
     path('order/', OrderView.as_view(), name='order'),  # 用户中心-订单
+    path('index/', IndexView.as_view(), name='index'),  # 用户中心-订单
 ]

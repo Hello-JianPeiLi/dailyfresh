@@ -190,3 +190,6 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = "default"
 # 设置默认地址
 LOGIN_URL = '/user/login'
+
+# 密码校验不关联is_active
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']

@@ -22,6 +22,7 @@ class RegisterView(View):
 
     def get(self, request):
         """获取注册页面"""
+
         return render(request, 'register.html')
 
     def post(self, request):

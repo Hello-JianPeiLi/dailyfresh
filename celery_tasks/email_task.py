@@ -2,7 +2,6 @@
 # Author: JianPei
 # @Time : 2021/08/19 14:55
 import django
-import win32timezone
 from celery import Celery
 from django.core.mail import send_mail
 import os
