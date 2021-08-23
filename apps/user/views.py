@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 from itsdangerous import SignatureExpired
 
 from celery_tasks.email_task import send_register_active_email
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from utils.mixin import LoginRequireMixin
 
 
@@ -62,11 +62,11 @@ class RegisterView(View):
 
         # 发送邮件
         username = user.username
-        # msg = '<h1>%s,欢迎注册，请点击下方连接激活</h1><a href="http://127.0.0.1:7890/user/active/%s">http://127.0.0.1:7890/user/active/%s</a>' % (
-        #     user.username, token, token)
-        # sender = '291075564@qq.com'
-        # subject = 'django项目，注册激活'
-        # send_mail(subject, msg, sender, ['root_pei@163.com'], html_message=msg, )
+        msg = '<h1>%s,欢迎注册，请点击下方连接激活</h1><a href="http://127.0.0.1:7890/user/active/%s">http://127.0.0.1:7890/user/active/%s</a>' % (
+            username, token, token)
+        sender = '291075564@qq.com'
+        subject = 'django项目，注册激活'
+        send_mail(subject, msg, sender, ['root_pei@163.com'], html_message=msg, )
         # 将邮件放到broker去做
         # send_register_active_email.delay(username, token)
 
@@ -115,7 +115,7 @@ class LoginView(View):
             if user.is_active:
                 login(request, user)
                 # 判断是否记住账号
-                response = redirect(reverse('user:index'))
+                response = redirect(reverse('goods:index'))
                 remember = request.POST.get('remember')
                 if remember == 'on':
                     response.set_cookie('username', username, max_age=60)
@@ -128,11 +128,27 @@ class LoginView(View):
             return render(request, 'login.html', {'error': '账号或密码错误'})
 
 
+class LoginOutView(View):
+    def get(self, request):
+        logout(request)
+        return redirect(reverse('goods:index'))
+
+
 class IndexView(View):
     def get(self, request):
         return render(request, 'index.html')
 
 
-class OrderView(LoginRequireMixin, View):
+class UserInfoView(LoginRequireMixin, View):
+    def get(self, request):
+        return render(request, 'user_center_info.html')
+
+
+class UserOrderView(LoginRequireMixin, View):
     def get(self, request):
         return render(request, 'user_center_order.html')
+
+
+class UserAddressView(LoginView, View):
+    def get(self, request):
+        return render(request, 'user_center_site.html')
