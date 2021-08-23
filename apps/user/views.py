@@ -12,6 +12,8 @@ from itsdangerous import SignatureExpired
 from celery_tasks.email_task import send_register_active_email
 from django.contrib.auth import authenticate, login, logout
 from utils.mixin import LoginRequireMixin
+from django_redis import get_redis_connection
+from apps.goods.models import GoodsSKU
 
 
 # from celery_tasks.email_task import send_register_active_email
@@ -144,7 +146,36 @@ class UserInfoView(LoginRequireMixin, View):
     def get(self, request):
         user = request.user
         address = Address.objects.get_default_address(user)
-        return render(request, 'user_center_info.html', {'address': address})
+
+        # 获取用户历史浏览信息
+        # from redis import StrictRedis
+        # sr = StrictRedis(host='172.16.179.130', port=6379, db=2)
+        con = get_redis_connection('default')
+
+        history_key = 'history_%d' % user.id
+
+        # 获取用户最近浏览的5个商品
+        sku_ids = con.lrange(history_key, 0, 4)
+
+        # # 从数据库中查询用户浏览的商品的具体信息
+        # goods_li = GoodsSKU.objects.filter(id__in=sku_ids)
+        #
+        # goods_res = []
+        # for a_id in sku_ids:
+        #     for goods in goods_li:
+        #         if a_id == goods.id:
+        #             goods_res.append(goods)
+
+        # 遍历获取用户浏览的历史商品信息
+        goods_li = []
+        for id in sku_ids:
+            goods = GoodsSKU.objects.get(id=id)
+            goods_li.append(goods)
+
+        context = {'address': address,
+                   'goods_li': goods_li}
+
+        return render(request, 'user_center_info.html', context)
 
 
 class UserOrderView(LoginRequireMixin, View):
