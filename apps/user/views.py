@@ -3,7 +3,7 @@ from django.views.generic import View
 from django.urls import reverse
 from django.http import HttpResponse
 import re
-from apps.user.models import User
+from apps.user.models import User, Address
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from dailyfresh import settings
 from django.core.mail import send_mail
@@ -115,7 +115,8 @@ class LoginView(View):
             if user.is_active:
                 login(request, user)
                 # 判断是否记住账号
-                response = redirect(reverse('goods:index'))
+                next_url = request.GET.get('next', reverse('goods:index'))
+                response = redirect(next_url)
                 remember = request.POST.get('remember')
                 if remember == 'on':
                     response.set_cookie('username', username, max_age=60)
@@ -141,7 +142,9 @@ class IndexView(View):
 
 class UserInfoView(LoginRequireMixin, View):
     def get(self, request):
-        return render(request, 'user_center_info.html')
+        user = request.user
+        address = Address.objects.get_default_address(user)
+        return render(request, 'user_center_info.html', {'address': address})
 
 
 class UserOrderView(LoginRequireMixin, View):
@@ -149,6 +152,51 @@ class UserOrderView(LoginRequireMixin, View):
         return render(request, 'user_center_order.html')
 
 
-class UserAddressView(LoginView, View):
+class UserAddressView(LoginRequireMixin, View):
     def get(self, request):
-        return render(request, 'user_center_site.html')
+        user = request.user
+        # try:
+        #     address = Address.objects.get(user=user, is_default=True)
+        # except Address.DoesNotExist:
+        #     address = None
+        # 上面try用了下面的封装
+        address = Address.objects.get_default_address(user=user)
+        return render(request, 'user_center_site.html', {'address': address})
+
+    def post(self, request):
+        receiver = request.POST.get('receiver')
+        addr = request.POST.get('addr')
+        zip_code = request.POST.get('zip_code')
+        phone = request.POST.get('phone')
+
+        # 判断填写信息是否为空
+        if not all([receiver, addr, phone]):
+            return render(request, 'user_center_site.html', {'error': '请填写相关信息'})
+
+        # 判断手机号格式
+        if not re.match(r'^1[3|4|5|6|7|8|9][0-9]{9}$', phone):
+            return render(request, 'user_center_site.html', {'error': '手机号格式不正确'})
+
+        user = request.user
+        # 查询是否有默认地址
+        # try:
+        #     address = Address.objects.get(user=user, is_default=True)
+        # except Address.DoesNotExist:
+        #     address = None
+        address = Address.objects.get_default_address(user=user)
+        # 如果有默认地址就将is_default设置None,表示新增地址时不设置为默认地址
+        if address:
+            is_default = False
+        else:
+            is_default = True
+
+        Address.objects.create(
+            user=user,
+            receiver=receiver,
+            addr=addr,
+            zip_code=zip_code,
+            phone=phone,
+            is_default=is_default
+        )
+
+        return redirect(reverse('user:address'))
