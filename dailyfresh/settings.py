@@ -160,7 +160,6 @@ EMAIL_USE_SSL = True
 # 收件人看到的发件人
 EMAIL_FROM = 'python<291075564@qq.com>'
 
-<<<<<<< HEAD
 # 登录验证
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
 
@@ -189,7 +188,5 @@ CACHES = {
 # 配置session存储
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = "default"
-=======
 # 设置默认地址
 LOGIN_URL = '/user/login'
->>>>>>> dfff577f6661e127f280946dc12688d11ba735d1

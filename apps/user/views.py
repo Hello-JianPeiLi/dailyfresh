@@ -8,16 +8,13 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from dailyfresh import settings
 from django.core.mail import send_mail
 from itsdangerous import SignatureExpired
-<<<<<<< HEAD
+
 from celery_tasks.email_task import send_register_active_email
 from django.contrib.auth import authenticate, login
-=======
 from utils.mixin import LoginRequireMixin
 
 
 # from celery_tasks.email_task import send_register_active_email
->>>>>>> dfff577f6661e127f280946dc12688d11ba735d1
-
 
 # /user/register
 class RegisterView(View):
@@ -64,20 +61,11 @@ class RegisterView(View):
 
         # 发送邮件
         username = user.username
-<<<<<<< HEAD
         # msg = '<h1>%s,欢迎注册，请点击下方连接激活</h1><a href="http://127.0.0.1:7890/user/active/%s">http://127.0.0.1:7890/user/active/%s</a>' % (
         #     user.username, token, token)
         # sender = '291075564@qq.com'
         # subject = 'django项目，注册激活'
         # send_mail(subject, msg, sender, ['root_pei@163.com'], html_message=msg, )
-=======
-        msg = '<h1>%s,欢迎注册，请点击下方连接激活</h1><a href="http://127.0.0.1:7890/user/active/%s">http://127.0.0.1:7890/user/active/%s</a>' % (
-            username, token, token)
-        sender = '291075564@qq.com'
-        subject = 'django项目，注册激活'
-        send_mail(subject, msg, sender, ['root_pei@163.com'], html_message=msg, )
->>>>>>> dfff577f6661e127f280946dc12688d11ba735d1
-
         # 将邮件放到broker去做
         # send_register_active_email.delay(username, token)
 
@@ -108,7 +96,6 @@ class LoginView(View):
     """登录页面"""
 
     def get(self, request):
-<<<<<<< HEAD
         if 'username' in request.COOKIES:
             username = request.COOKIES['username']
         else:
@@ -143,11 +130,8 @@ class LoginView(View):
 class IndexView(View):
     def get(self, request):
         return render(request, 'index.html')
-=======
-        return render(request, 'login.html')
 
 
 class OrderView(LoginRequireMixin, View):
     def get(self, request):
         return render(request, 'user_center_order.html')
->>>>>>> dfff577f6661e127f280946dc12688d11ba735d1
