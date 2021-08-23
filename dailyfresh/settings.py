@@ -159,3 +159,32 @@ EMAIL_HOST_PASSWORD = 'cgodjyfcarsfbiib'
 EMAIL_USE_SSL = True
 # 收件人看到的发件人
 EMAIL_FROM = 'python<291075564@qq.com>'
+
+# 登录验证
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
+
+# 使用redis存储session
+
+# SESSION_ENGINE = 'redis_sessions.session'
+# SESSION_REDIS_HOST = '192.168.101.129'
+# SESSION_REDIS_PORT = 6379
+# SESSION_REDIS_DB = 3
+# SESSION_REDIS_PASSWORD = ''
+# SESSION_REDIS_PREFIX = 'session'
+
+# django缓存配置
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://192.168.101.129/3",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {"max_connections": 100},
+            "PASSWORD": "",
+        }
+    }
+}
+
+# 配置session存储
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = "default"

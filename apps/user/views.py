@@ -9,6 +9,7 @@ from dailyfresh import settings
 from django.core.mail import send_mail
 from itsdangerous import SignatureExpired
 from celery_tasks.email_task import send_register_active_email
+from django.contrib.auth import authenticate, login
 
 
 # /user/register
@@ -45,7 +46,7 @@ class RegisterView(View):
             return render(request, 'register.html', {'error': '用户名已存在'})
 
         # 业务处理进行注册
-        user = User.objects.create_user(username, password, email)
+        user = User.objects.create_user(username, email, password)
         user.is_active = 0
         user.save()
 
@@ -56,7 +57,6 @@ class RegisterView(View):
 
         # 发送邮件
         username = user.username
-        print(username)
         # msg = '<h1>%s,欢迎注册，请点击下方连接激活</h1><a href="http://127.0.0.1:7890/user/active/%s">http://127.0.0.1:7890/user/active/%s</a>' % (
         #     user.username, token, token)
         # sender = '291075564@qq.com'
@@ -93,4 +93,37 @@ class LoginView(View):
     """登录页面"""
 
     def get(self, request):
-        return render(request, 'login.html')
+        if 'username' in request.COOKIES:
+            username = request.COOKIES['username']
+        else:
+            username = ''
+        return render(request, 'login.html', {'username': username})
+
+    def post(self, request):
+        username = request.POST.get('username')
+        password = request.POST.get('pwd')
+        if not all([username, password]):
+            return render(request, 'login.html', {'error': '请填写账号或密码'})
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            # 用户密码正确
+            # 是否激活
+            if user.is_active:
+                login(request, user)
+                # 判断是否记住账号
+                response = redirect(reverse('user:index'))
+                remember = request.POST.get('remember')
+                if remember == 'on':
+                    response.set_cookie('username', username, max_age=60)
+                else:
+                    response.delete_cookie('username')
+                return response
+            else:
+                return render(request, 'login.html', {'error': '用户未激活'})
+        else:
+            return render(request, 'login.html', {'error': '账号或密码错误'})
+
+
+class IndexView(View):
+    def get(self, request):
+        return render(request, 'index.html')
