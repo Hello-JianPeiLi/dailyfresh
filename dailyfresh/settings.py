@@ -193,3 +193,12 @@ LOGIN_URL = '/user/login'
 
 # 密码校验不关联is_active
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
+
+# 配置fdfs
+DEFAULT_FILE_STORAGE = 'utils.fdfs.storage.FDFSStorage'
+
+# fdfs文件系统使用的client.conf配置路径
+FDFS_CLIENT_CONF = './utils/fdfs/client.conf'
+
+# fastdfs存储服务器上nginx使用的IP和端口号
+FDFS_STORAGE_URL = 'http://172.16.126.198:8888/'
