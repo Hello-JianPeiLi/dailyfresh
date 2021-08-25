@@ -9,7 +9,7 @@ from dailyfresh import settings
 from django.core.mail import send_mail
 from itsdangerous import SignatureExpired
 
-from celery_tasks.email_task import send_register_active_email
+from celery_tasks.task import send_register_active_email
 from django.contrib.auth import authenticate, login, logout
 from utils.mixin import LoginRequireMixin
 from django_redis import get_redis_connection
@@ -139,7 +139,7 @@ class LoginOutView(View):
 
 class IndexView(View):
     def get(self, request):
-        return render(request, 'index1.html')
+        return render(request, 'index.html')
 
 
 class UserInfoView(LoginRequireMixin, View):

@@ -40,8 +40,6 @@ class IndexView(View):
             # 动态给type增加属性，分别保存首页分类商品的图片展示信息和文字展示信息
             type.image_banners = image_banners
             type.title_banners = title_banners
-        for type in types:
-            print('type', type.title_banners)
 
         # 获取用户购物车中商品的数目
         user = request.user
