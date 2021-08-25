@@ -22,3 +22,7 @@ def send_register_active_email(username, token):
     sender = '291075564@qq.com'
     subject = 'django项目，注册激活'
     send_mail(subject, '', sender, ['root_pei@163.com'], html_message=msg, )
+
+
+def generate_static_index_html():
+    pass
