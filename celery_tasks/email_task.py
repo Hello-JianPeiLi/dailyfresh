@@ -11,7 +11,7 @@ import time
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dailyfresh.settings')
 django.setup()
 
-app = Celery('celery_tasks.email_task', broker='redis://192.168.101.129/2')
+app = Celery('celery_tasks.email_task', broker='redis://172.16.126.198/2')
 
 
 @app.task
@@ -22,4 +22,3 @@ def send_register_active_email(username, token):
     sender = '291075564@qq.com'
     subject = 'django项目，注册激活'
     send_mail(subject, '', sender, ['root_pei@163.com'], html_message=msg, )
-    time.sleep(5)

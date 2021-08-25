@@ -143,7 +143,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 富文本编辑器配置
 TINYMCE_DEFAULT_CONFIG = {
-    'theme': 'advanced',
+    'theme':'silver',
     'width': 600,
     'height': 400,
 }

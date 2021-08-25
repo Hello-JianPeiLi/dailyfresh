@@ -64,13 +64,13 @@ class RegisterView(View):
 
         # 发送邮件
         username = user.username
-        msg = '<h1>%s,欢迎注册，请点击下方连接激活</h1><a href="http://127.0.0.1:7890/user/active/%s">http://127.0.0.1:7890/user/active/%s</a>' % (
-            username, token, token)
-        sender = '291075564@qq.com'
-        subject = 'django项目，注册激活'
-        send_mail(subject, msg, sender, ['root_pei@163.com'], html_message=msg, )
+        # msg = '<h1>%s,欢迎注册，请点击下方连接激活</h1><a href="http://127.0.0.1:7890/user/active/%s">http://127.0.0.1:7890/user/active/%s</a>' % (
+        #     username, token, token)
+        # sender = '291075564@qq.com'
+        # subject = 'django项目，注册激活'
+        # send_mail(subject, msg, sender, ['root_pei@163.com'], html_message=msg, )
         # 将邮件放到broker去做
-        # send_register_active_email.delay(username, token)
+        send_register_active_email.delay(username, token)
 
         # 注册完跳转到首页
         return redirect(reverse('goods:index'))
@@ -184,6 +184,8 @@ class UserOrderView(LoginRequireMixin, View):
 
 
 class UserAddressView(LoginRequireMixin, View):
+    """用户中心-地址"""
+
     def get(self, request):
         user = request.user
         # try:
