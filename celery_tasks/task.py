@@ -13,7 +13,7 @@ from dailyfresh import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dailyfresh.settings')
 django.setup()
 
-app = Celery('celery_tasks.email_task', broker='redis://172.16.126.198/2')
+app = Celery('celery_tasks.email_task', broker='redis://:Libai.123@172.16.126.198:9763/2')
 
 
 @app.task

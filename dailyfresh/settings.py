@@ -89,8 +89,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'dailyfresh',
-        'USER': 'root',
-        'PASSWORD': password,
+        'USER': 'libai',
+        'PASSWORD': '123456',
         'HOST': '172.16.2.52',
         'PORT': 3306,
     }
@@ -143,7 +143,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 富文本编辑器配置
 TINYMCE_DEFAULT_CONFIG = {
-    'theme':'silver',
+    'theme': 'silver',
     'width': 600,
     'height': 400,
 }
@@ -166,13 +166,14 @@ AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBacke
 # 使用redis存储session
 
 # SESSION_ENGINE = 'redis_sessions.session'
-# SESSION_REDIS_HOST = '192.168.101.129'
+# SESSION_REDIS_HOST = '172.16.126.198'
 # SESSION_REDIS_PORT = 6379
 # SESSION_REDIS_DB = 3
-# SESSION_REDIS_PASSWORD = ''
+# SESSION_REDIS_PASSWORD = 'Liabi.123'
 # SESSION_REDIS_PREFIX = 'session'
 
 # django缓存配置
+REDIS_PASSWORD = 'Libai.123'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -180,7 +181,7 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {"max_connections": 100},
-            "PASSWORD": "",
+            "PASSWORD": REDIS_PASSWORD,
         }
     }
 }
@@ -190,9 +191,6 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = "default"
 # 设置默认地址
 LOGIN_URL = '/user/login'
-
-# 密码校验不关联is_active
-AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
 
 # 配置fdfs
 DEFAULT_FILE_STORAGE = 'utils.fdfs.storage.FDFSStorage'
