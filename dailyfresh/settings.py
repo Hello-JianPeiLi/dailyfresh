@@ -177,7 +177,7 @@ REDIS_PASSWORD = 'Libai.123'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://172.16.126.198/0",
+        "LOCATION": "redis://:Libai.123@172.16.126.198:9763/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {"max_connections": 100},
