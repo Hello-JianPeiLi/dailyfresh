@@ -15,8 +15,11 @@ import os
 import sys
 
 if sys.platform == 'win32':
+    MYSQL_IP = '172.16.2.52'
     password = '123456'
 else:
+    MYSQL_IP = '120.77.84.24'
+    MYSQL_PASSWORD = 'Libai.123'
     password = 'te666666'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -90,8 +93,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'dailyfresh',
         'USER': 'libai',
-        'PASSWORD': '123456',
-        'HOST': '172.16.2.52',
+        'PASSWORD': MYSQL_PASSWORD,
+        'HOST': MYSQL_IP,
         'PORT': 3306,
     }
 }
