@@ -183,7 +183,7 @@ REDIS_PASSWORD = 'Libai.123'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:Libai.123@172.16.126.198:9763/0",
+        "LOCATION": "redis://:Libai.123@%s:9763/0" % REDIS_IP,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {"max_connections": 100},
@@ -205,4 +205,4 @@ DEFAULT_FILE_STORAGE = 'utils.fdfs.storage.FDFSStorage'
 FDFS_CLIENT_CONF = './utils/fdfs/client.conf'
 
 # fastdfs存储服务器上nginx使用的IP和端口号
-FDFS_STORAGE_URL = 'http://172.16.126.198:8888/'
+FDFS_STORAGE_URL = 'http://%s:8888/' % REDIS_IP
