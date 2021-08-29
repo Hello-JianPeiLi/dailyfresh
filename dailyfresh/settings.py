@@ -16,11 +16,14 @@ import sys
 
 if sys.platform == 'win32':
     MYSQL_IP = '172.16.2.52'
-    password = '123456'
+    MYSQL_PASSWORD = '123456'
+    REDIS_IP = '172.16.126.198'
+    REDIS_PASSWORD = 'Libai.123'
 else:
     MYSQL_IP = '120.77.84.24'
     MYSQL_PASSWORD = 'Libai.123'
-    password = 'te666666'
+    REDIS_IP = '120.77.84.24'
+    REDIS_PASSWORD = 'Libai.123'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

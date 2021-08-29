@@ -5,15 +5,15 @@ import django
 from celery import Celery
 from django.core.mail import send_mail
 import os
-from apps.goods.models import GoodsType, IndexGoodsBanner, IndexTypeGoodsBanner, IndexPromotionBanner
 from django.template import loader, RequestContext
 from dailyfresh import settings
 
 # 为worker初始化环境
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dailyfresh.settings')
 django.setup()
+from apps.goods.models import GoodsType, IndexGoodsBanner, IndexTypeGoodsBanner, IndexPromotionBanner
 
-app = Celery('celery_tasks.email_task', broker='redis://:Libai.123@172.16.126.198:9763/2')
+app = Celery('celery_tasks.email_task', broker='redis://:Libai.123@%s:9763/2' % settings.REDIS_IP)
 
 
 @app.task
