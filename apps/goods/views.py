@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.views.generic import View
 from apps.goods.models import GoodsType, IndexGoodsBanner, IndexPromotionBanner, IndexTypeGoodsBanner, GoodsSKU
+from apps.order.models import OrderGoods
 from django_redis import get_redis_connection
+from django.shortcuts import redirect, reverse
 
 
 # Create your views here.
@@ -68,9 +70,34 @@ class DetailView(View):
     def get(self, request, goods_id):
         """显示详情页"""
         # 获取商品的种类信息
-        sku = GoodsSKU.objects.filter(id=goods_id)
-        print(sku)
+        try:
+            sku = GoodsSKU.objects.filter(id=goods_id)
+        except GoodsSKU.DoesNotExist:
+            # 商品不存在
+            return redirect(reverse('goods:index'))
+
+        # 获取商品分类信息
+        types = GoodsType.objects.all()
+
+        # 获取商品评论信息
+        sku_comment = OrderGoods.objects.filter(sku=sku).exclude(comment='')
+
+        # 获取新品推荐
+        new_skus = GoodsSKU.objects.filter(type=sku.type).order_by('-create_time')
+
+        # 获取购物车数量
+        cart_count = 0
+        user = request.user
+        if user.is_authenticated:
+            # 用户已登录
+            conn = get_redis_connection('default')
+            cart_key = 'cart_%d' % user.id
+            cart_count = conn.hlen(cart_key)
+        # 组织上下文模板
         context = {
-            'sku': sku
+            'sku': sku,
+            'types': types,
+            'new_skus': new_skus,
+            'cart_count': cart_count
         }
         return render(request, 'detail.html', context)

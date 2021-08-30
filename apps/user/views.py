@@ -8,7 +8,6 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from dailyfresh import settings
 from django.core.mail import send_mail
 from itsdangerous import SignatureExpired
-
 from celery_tasks.task import send_register_active_email
 from django.contrib.auth import authenticate, login, logout
 from utils.mixin import LoginRequireMixin
