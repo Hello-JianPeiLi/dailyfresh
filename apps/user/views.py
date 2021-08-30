@@ -143,6 +143,8 @@ class IndexView(View):
 
 
 class UserInfoView(LoginRequireMixin, View):
+    """用户中心信息页"""
+
     def get(self, request):
         user = request.user
         address = Address.objects.get_default_address(user)
