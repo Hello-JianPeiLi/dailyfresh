@@ -19,6 +19,9 @@ if sys.platform == 'win32':
     MYSQL_PASSWORD = '123456'
     REDIS_IP = '172.16.126.198'
     REDIS_PASSWORD = 'Libai.123'
+elif sys.platform == 'linux':
+    REDIS_IP = '172.16.126.198'
+    REDIS_PASSWORD = 'Libai.123'
 else:
     MYSQL_IP = '120.77.84.24'
     MYSQL_PASSWORD = 'Libai.123'

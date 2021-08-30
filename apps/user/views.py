@@ -67,7 +67,7 @@ class RegisterView(View):
         # msg = '<h1>%s,欢迎注册，请点击下方连接激活</h1><a href="http://127.0.0.1:7890/user/active/%s">http://127.0.0.1:7890/user/active/%s</a>' % (
         #     username, token, token)
         # sender = '291075564@qq.com'
-        # subject = 'django项目，注册激活'
+        # subject = 'django项目，注册激活F'
         # send_mail(subject, msg, sender, ['root_pei@163.com'], html_message=msg, )
         # 将邮件放到broker去做
         send_register_active_email.delay(username, token)
