@@ -15,7 +15,7 @@ from apps.goods.models import GoodsType, IndexGoodsBanner, IndexTypeGoodsBanner,
 
 app = Celery('celery_tasks.email_task', broker='redis://:Libai.123@%s:9763/2' % settings.REDIS_IP)
 
-print('redis://:Libai.123@%s:9763/2' % settings.REDIS_IP)
+
 
 
 @app.task

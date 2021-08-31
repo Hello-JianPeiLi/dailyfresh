@@ -71,11 +71,12 @@ class DetailView(View):
         """显示详情页"""
         # 获取商品的种类信息
         try:
-            sku = GoodsSKU.objects.filter(id=goods_id)
+            sku = GoodsSKU.objects.get(id=goods_id)
         except GoodsSKU.DoesNotExist:
             # 商品不存在
             return redirect(reverse('goods:index'))
 
+        print(sku.goods)
         # 获取商品分类信息
         types = GoodsType.objects.all()
 
@@ -85,6 +86,9 @@ class DetailView(View):
         # 获取新品推荐
         new_skus = GoodsSKU.objects.filter(type=sku.type).order_by('-create_time')
 
+        #
+        same_spu_skus = GoodsSKU.objects.filter(goods=sku.goods).exclude(id=goods_id)
+
         # 获取购物车数量
         cart_count = 0
         user = request.user
@@ -93,11 +97,22 @@ class DetailView(View):
             conn = get_redis_connection('default')
             cart_key = 'cart_%d' % user.id
             cart_count = conn.hlen(cart_key)
+
+            conn = get_redis_connection('default')
+            history_key = 'history_%d' % user.id
+            # 移除列表中的goods_id
+            conn.lrem(history_key, 0, goods_id)
+            # 把goods_id插入到列表的左侧
+            conn.lpush(history_key, goods_id)
+            conn.ltrim(history_key, 0, 4)
+
         # 组织上下文模板
         context = {
             'sku': sku,
             'types': types,
             'new_skus': new_skus,
-            'cart_count': cart_count
+            'cart_count': cart_count,
+            'sku_comment': sku_comment,
+            'same_spu_skus': same_spu_skus
         }
         return render(request, 'detail.html', context)
