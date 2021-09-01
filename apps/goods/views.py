@@ -4,6 +4,7 @@ from apps.goods.models import GoodsType, IndexGoodsBanner, IndexPromotionBanner,
 from apps.order.models import OrderGoods
 from django_redis import get_redis_connection
 from django.shortcuts import redirect, reverse
+from django.core.paginator import Paginator
 
 
 # Create your views here.
@@ -64,6 +65,7 @@ class IndexView(View):
         return render(request, 'index.html', context)
 
 
+# /goods/goods_id
 class DetailView(View):
     """商品详情页"""
 
@@ -97,7 +99,7 @@ class DetailView(View):
             conn = get_redis_connection('default')
             cart_key = 'cart_%d' % user.id
             cart_count = conn.hlen(cart_key)
-
+            # 用户历史记录
             conn = get_redis_connection('default')
             history_key = 'history_%d' % user.id
             # 移除列表中的goods_id
@@ -116,3 +118,67 @@ class DetailView(View):
             'same_spu_skus': same_spu_skus
         }
         return render(request, 'detail.html', context)
+
+
+# /list/1/2?sort=default
+class ListView(View):
+    """列表展示"""
+
+    def get(self, request, type_id, page):
+        try:
+            # 查询种类
+            type = GoodsType.objects.get(id=type_id)
+        except GoodsType.DoesNotExist:
+            # 种类不存在
+            return redirect(reverse('goods:index'))
+
+        # 获取商品的分类信息
+        types = GoodsType.objects.all()
+
+        # 根据分类查询所有商品
+        # 根据排序显示商品
+        sort = request.GET.get('sort')
+        if sort == 'price':
+            # 根据价格降序
+            skus = GoodsSKU.objects.filter(type=type).order_by('-price')
+        elif sort == 'sales':
+            # 根据销售量降序
+            skus = GoodsSKU.objects.filter(type=type).order_by('-sales')
+        else:
+            # 根据商品id降序
+            skus = GoodsSKU.objects.filter(type=type).order_by('-id')
+
+        paginator = Paginator(skus, 1)
+        # 获取页面
+        try:
+            page = int(page)
+        except Exception as e:
+            page = 1
+
+        if page > paginator.num_pages:
+            page = 1
+
+        # 获取第page页的实例对象
+        skus_page = paginator.page(page)
+
+        # 获取新品推荐
+        new_skus = GoodsSKU.objects.filter(type=type).order_by('-create_time')
+
+        # 购物车
+        cart_count = 0
+        user = request.user
+        if user.is_authenticated:
+            # 用户已登录
+            conn = get_redis_connection('default')
+            cart_key = 'cart_%d' % user.id
+            cart_count = conn.hlen(cart_key)
+
+        # 模板上下文
+        context = {
+            "types": types,
+            'type': type,
+            "skus_page": skus_page,
+            "new_sku": new_skus,
+            "cart_count": cart_count
+        }
+        return render(request, 'list.html', context)
