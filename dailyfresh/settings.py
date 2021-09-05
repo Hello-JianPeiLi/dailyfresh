@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'tinymce',  # 富文本编辑器
+    'haystack',  # 全文检索框架
     'apps.user',
     'apps.goods',
     'apps.cart',
@@ -209,3 +210,20 @@ FDFS_CLIENT_CONF = './utils/fdfs/client.conf'
 # fastdfs存储服务器上nginx使用的IP和端口号
 FDFS_STORAGE_URL = 'http://120.77.84.24:8888/'
 # FDFS_STORAGE_URL = 'http://172.16.126.198:8888/'
+
+
+# 全文检索框架配置
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        # 使用whoosh引擎
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        # 索引文件路径
+        'PATH': os.path.join(BASE_DIR, 'whoosh_index')
+    }
+}
+
+# 当添加、修改、删除数据时，自动生成索引
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+# 指定搜索结果每页显示的条数
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5
