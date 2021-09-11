@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}天天生鲜-购物车{% endblock title %}
 {% block body %}
-
+    {% load static %}
     <div class="total_count">全部商品<em>{{ total_count }}</em>件</div>
     <ul class="cart_list_th clearfix">
         <li class="col01">商品名称</li>
@@ -36,3 +36,52 @@
         <li class="col04"><a href="place_order.html">去结算</a></li>
     </ul>
 {% endblock body %}
+
+{% block bottomfiles %}
+    <script src={% static 'js/jquery-1.12.4.min.js' %}></script>
+    <script type="text/javascript">
+        // 计算被选中商品的总件数和总价格
+        function update_page_info() {
+            total_amount = 0
+            total_count = 0
+            $('.cart_list_td').find(':checked').parents('ul').each(function () {
+                amount = $(this).children('.col07').text()
+                count = $(this).find('.num_show').val()
+                // 计算商品的总件数和总价格
+                amount = parseFloat(amount)
+                count = parseInt(count)
+
+                total_amount += amount
+                total_count += count
+            });
+            // 设置被选中商品的总价格和总件数
+            $('.settlements').find('em').text(total_amount.toFixed(2))
+            $('.settlements').find('b').text(total_count)
+        }
+
+        // 全选控制
+        $('.settlements').find(':checkbox').change(function () {
+            is_checked = $(this).prop('checked')
+            console.log(is_checked)
+            $('.cart_list_td').find(':checkbox').each(function () {
+                $(this).prop('checked', is_checked)
+            });
+            update_page_info()
+        })
+
+        // 商品对应的checkbox发生改变时，设置全选checkbox的状态
+        $('.cart_list_td').find(':checkbox').change(function () {
+            all_len = $('.cart_list_td').length
+            checked_len = $('.cart_list_td').find(':checked').length
+            console.log(all_len)
+            console.log(checked_len)
+            is_checked = true
+            if (checked_len < all_len) {
+                is_checked = false
+            }
+            $('.settlements').find(':checkbox').prop('checked', is_checked)
+            update_page_info()
+        })
+    </script>
+
+{% endblock bottomfiles %}
