@@ -18,7 +18,6 @@ class CartAddView(View):
         """购物车记录添加"""
         # 获取数据
         user = request.user
-        print(user.id)
         if not user.is_authenticated:
             # 用户未登录
             return JsonResponse({'res': 5, 'msg': '请先登录'})
@@ -89,3 +88,39 @@ class CartInfoView(LoginRequireMixin, View):
             'total_price': total_price
         }
         return render(request, 'cart.html', context)
+
+
+class CartUpdateView(View):
+    def post(self, request):
+        user = request.user
+        if user.is_authenticated:
+            return JsonResponse({'res': 5, 'msg': '请先登录'})
+        # 接收数据
+        sku_id = request.POST.get('sku_id')
+        count = request.POST.get('count')
+        # 校验数据
+        if not all([sku_id, count]):
+            return JsonResponse({'res': 0, 'msg': '数据不完整'})
+
+        try:
+            sku_id = int(sku_id)
+            count = int(sku_id)
+        except:
+            return JsonResponse({'res': 1, 'msg': '类型出错'})
+
+        # 判断商品是否存在
+        try:
+            sku = GoodsSKU.objects.get(id=sku_id)
+        except GoodsSKU.DoesNotExist:
+            return JsonResponse({'res': 1, 'msg': '数目出错'})
+
+        # 更新购物车数量
+        conn = get_redis_connection('default')
+        cart_key = 'cart_%s' % user.id
+
+        if count > sku.stock:
+            return JsonResponse({'res': 4, 'msg': '商品库存不足'})
+
+        # 更新
+        conn.hset(cart_key, sku_id, count)
+        return JsonResponse({'res': 6, 'msg': '更新成功'})
