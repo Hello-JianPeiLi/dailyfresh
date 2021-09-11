@@ -42,7 +42,8 @@
             <div class="total">总价：<em>16.80元</em></div>
             <div class="operate_btn">
                 <a href="javascript:;" class="buy_btn">立即购买</a>
-                <a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>
+                {% csrf_token %}
+                <a href="javascript:;" sku_id={{ sku.id }} class="add_cart" id="add_cart">加入购物车</a>
             </div>
         </div>
     </div>
@@ -85,6 +86,7 @@
 
 
 {% block bottomfiles %}
+    <div class="add_jump"></div>
     <script type="text/javascript" src={% static 'js/jquery-1.12.4.min.js' %}></script>
     <script type="text/javascript">
         update_goods_amount()
@@ -119,6 +121,9 @@
             count = $('.num_show').val()
             // -1
             count = parseInt(count) - 1
+            if (count < 1) {
+                count = 1
+            }
             // reset 商品的数目
             $('.num_show').val(count)
             // 更新商品的总价
@@ -145,18 +150,30 @@
         var $to_x = $('#show_count').offset().top;
         var $to_y = $('#show_count').offset().left;
 
-        $(".add_jump").css({'left': $add_y + 80, 'top': $add_x + 10, 'display': 'block'})
-        $('#add_cart').click(function () {
-            $(".add_jump").stop().animate({
-                    'left': $to_y + 7,
-                    'top': $to_x + 7
-                },
-                "fast", function () {
-                    $(".add_jump").fadeOut('fast', function () {
-                        $('#show_count').html(2);
-                    });
 
-                });
+        $('#add_cart').click(function () {
+            count = $('.num_show').val()
+            sku_id = $(this).attr('sku_id')
+            csrf = $('input[name="csrfmiddlewaretoken"]').val()
+            params = {'sku_id': sku_id, 'count': count, 'csrfmiddlewaretoken': csrf}
+            $.post('/cart/add/', params, function (data) {
+                if (data.res == 3) {
+                    $(".add_jump").css({'left': $add_y + 80, 'top': $add_x + 10, 'display': 'block'})
+                    $(".add_jump").stop().animate({
+                            'left': $to_y + 7,
+                            'top': $to_x + 7
+                        },
+                        "fast", function () {
+                            $(".add_jump").fadeOut('fast', function () {
+                                $('#show_count').html(data.total_count);
+                            });
+                        })
+                } else {
+                    alert(data.msg)
+                }
+            })
+
+
         })
     </script>
 {% endblock bottomfiles %}
