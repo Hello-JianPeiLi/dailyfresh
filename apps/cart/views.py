@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from apps.goods.models import GoodsSKU
 from django_redis import get_redis_connection
 from django.shortcuts import redirect, reverse
+from utils.mixin import LoginRequireMixin
 
 
 # 添加商品到购物车
@@ -56,3 +57,35 @@ class CartAddView(View):
         total_count = conn.hlen(cart_key)
         # 返回应答
         return JsonResponse({'res': 3, 'total_count': total_count, 'msg': '添加成功'})
+
+
+# /cart/
+class CartInfoView(LoginRequireMixin, View):
+    """购物车显示页面"""
+
+    def get(self, request):
+        user = request.user
+        conn = get_redis_connection('default')
+        cart_key = 'cart_%s' % user.id
+        cart_dict = conn.hgetall(cart_key)
+        # cart_dict = {'商品id': 商品数量}
+        skus = []
+        total_count = 0
+        total_price = 0
+        for sku_id, count in cart_dict.items():
+            sku = GoodsSKU.objects.get(id=sku_id)
+            amount = sku.price * int(count)
+            # 动态添加属性
+            sku.amount = amount
+            sku.count = int(count)
+            skus.append(sku)
+
+            total_count += int(count)
+            total_price += amount
+
+        context = {
+            'skus': skus,
+            'total_count': total_count,
+            'total_price': total_price
+        }
+        return render(request, 'cart.html', context)
