@@ -13,6 +13,7 @@
     </ul>
     {% for sku in skus %}
         <ul class="cart_list_td clearfix">
+            {% csrf_token %}
             <li class="col01"><input type="checkbox" name="" checked></li>
             <li class="col02"><img src={{ sku.image.url }}></li>
             <li class="col03">{{ sku.name }}<br><em>{{ sku.price }}元/{{ sku.unite }}</em></li>
@@ -21,7 +22,7 @@
             <li class="col06">
                 <div class="num_add">
                     <a href="javascript:;" class="add fl">+</a>
-                    <input type="text" class="num_show fl" value={{ sku.count }}>
+                    <input type="text" sku_id="{{ sku.id }}" class="num_show fl" value={{ sku.count }}>
                     <a href="javascript:;" class="minus fl">-</a>
                 </div>
             </li>
@@ -59,6 +60,15 @@
             $('.settlements').find('b').text(total_count)
         }
 
+        // 计算商品小计
+        function update_goods_amount(sku_ul) {
+            // 获取商品的价格和数量
+            let price = sku_ul.find('.col05').text()
+            let count = sku_ul.find('.num_show').val()
+            let amount = parseFloat(price) * parseInt(count)
+            sku_ul.find('.col07').text(amount.toFixed(2) + '元')
+        }
+
         // 全选控制
         $('.settlements').find(':checkbox').change(function () {
             is_checked = $(this).prop('checked')
@@ -81,6 +91,48 @@
             }
             $('.settlements').find(':checkbox').prop('checked', is_checked)
             update_page_info()
+        })
+
+        // 购物车商品增加（+）
+        $('.add').click(function () {
+            // 获取商品的id和数量
+            let count = $(this).next().val()
+            console.log(count)
+            count = parseInt(count) + 1
+            console.log(count)
+            let sku_id = $(this).next().attr('sku_id')
+            let csrf = $('input[name="csrfmiddlewaretoken"]').val()
+            let params = {'count': count, 'sku_id': sku_id, 'csrfmiddlewaretoken': csrf}
+            let error_updata = false
+            let total = 0
+            $.ajaxSettings.async = false
+            $.post('/cart/update', params, function (data) {
+                if (data.res == 6) {
+                    error_updata = false
+                    total = data.total_count
+                    console.log(total)
+                    console.log('更新成功')
+                } else {
+                    error_updata = true
+                    alert(data.msg)
+                }
+                $.ajaxSettings.async = true
+            });
+            // 判断更新是否成功
+            if (error_updata == false) {
+                // 重新设置商品的数目
+                $(this).next().val(count)
+                // 计算商品的小计
+                update_goods_amount($(this).parents('ul'))
+                // 获取商品对应的checkbox的选中装填，如果被选中，更新页面信息
+                let is_checked = $(this).parents('ul').find(':checkbox').prop('checked')
+                console.log(is_checked)
+                if (is_checked) {
+                    // 更新页面
+                    update_page_info()
+                }
+                $('.total_count').find('em').text(total);
+            }
         })
     </script>
 

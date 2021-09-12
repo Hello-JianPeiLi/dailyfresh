@@ -90,21 +90,25 @@ class CartInfoView(LoginRequireMixin, View):
         return render(request, 'cart.html', context)
 
 
+# /cart/update
 class CartUpdateView(View):
+    """更新购物车数量"""
+
     def post(self, request):
         user = request.user
-        if user.is_authenticated:
+        if not user.is_authenticated:
             return JsonResponse({'res': 5, 'msg': '请先登录'})
         # 接收数据
         sku_id = request.POST.get('sku_id')
         count = request.POST.get('count')
+
         # 校验数据
         if not all([sku_id, count]):
             return JsonResponse({'res': 0, 'msg': '数据不完整'})
 
         try:
             sku_id = int(sku_id)
-            count = int(sku_id)
+            count = int(count)
         except:
             return JsonResponse({'res': 1, 'msg': '类型出错'})
 
@@ -121,6 +125,16 @@ class CartUpdateView(View):
         if count > sku.stock:
             return JsonResponse({'res': 4, 'msg': '商品库存不足'})
 
+        print(sku_id)
+        print(count)
         # 更新
         conn.hset(cart_key, sku_id, count)
-        return JsonResponse({'res': 6, 'msg': '更新成功'})
+
+        total_count = 0
+        # 购物车的总件数
+        vals = conn.hvals(cart_key)
+        print(vals)
+        for count in vals:
+            total_count += int(count)
+        print(total_count)
+        return JsonResponse({'res': 6, 'total_count': total_count, 'msg': '更新成功'})
