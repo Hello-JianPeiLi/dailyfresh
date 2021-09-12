@@ -69,6 +69,27 @@
             sku_ul.find('.col07').text(amount.toFixed(2) + '元')
         }
 
+        let error_update = false
+        let total = 0
+
+        function update_remote_cart_info(sku_id, count) {
+            let csrf = $('input[name="csrfmiddlewaretoken"]').val()
+            let params = {'count': count, 'sku_id': sku_id, 'csrfmiddlewaretoken': csrf}
+            $.ajaxSettings.async = false
+            $.post('/cart/update', params, function (data) {
+                if (data.res == 6) {
+                    error_update = false
+                    total = data.total_count
+                    console.log(total)
+                    console.log('更新成功')
+                } else {
+                    error_update = true
+                    alert(data.msg)
+                }
+            });
+            $.ajaxSettings.async = true
+        }
+
         // 全选控制
         $('.settlements').find(':checkbox').change(function () {
             is_checked = $(this).prop('checked')
@@ -97,29 +118,11 @@
         $('.add').click(function () {
             // 获取商品的id和数量
             let count = $(this).next().val()
-            console.log(count)
             count = parseInt(count) + 1
-            console.log(count)
             let sku_id = $(this).next().attr('sku_id')
-            let csrf = $('input[name="csrfmiddlewaretoken"]').val()
-            let params = {'count': count, 'sku_id': sku_id, 'csrfmiddlewaretoken': csrf}
-            let error_updata = false
-            let total = 0
-            $.ajaxSettings.async = false
-            $.post('/cart/update', params, function (data) {
-                if (data.res == 6) {
-                    error_updata = false
-                    total = data.total_count
-                    console.log(total)
-                    console.log('更新成功')
-                } else {
-                    error_updata = true
-                    alert(data.msg)
-                }
-                $.ajaxSettings.async = true
-            });
+            update_remote_cart_info(sku_id,count)
             // 判断更新是否成功
-            if (error_updata == false) {
+            if (error_update == false) {
                 // 重新设置商品的数目
                 $(this).next().val(count)
                 // 计算商品的小计
@@ -141,29 +144,13 @@
             let count = $(this).prev().val()
             count = parseInt(count) - 1
             let sku_id = $(this).prev().attr('sku_id')
-            let csrf = $('input[name="csrfmiddlewaretoken"]').val()
             if (count <= 0) {
                 return
             }
-            let params = {'count': count, 'sku_id': sku_id, 'csrfmiddlewaretoken': csrf}
-            console.log(params)
-            let error_updata = false
-            let total = 0
-            $.ajaxSettings.async = false
-            $.post('/cart/update', params, function (data) {
-                if (data.res == 6) {
-                    error_updata = false
-                    total = data.total_count
-                    console.log(total)
-                    console.log('更新成功')
-                } else {
-                    error_updata = true
-                    alert(data.msg)
-                }
-                $.ajaxSettings.async = true
-            });
+            update_remote_cart_info(sku_id, count)
+
             // 判断更新是否成功
-            if (error_updata == false) {
+            if (error_update == false) {
                 // 重新设置商品的数目
                 $(this).prev().val(count)
                 // 计算商品的小计
