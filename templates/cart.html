@@ -27,7 +27,7 @@
                 </div>
             </li>
             <li class="col07">{{ sku.amount }}元</li>
-            <li class="col08"><a href="javascript:;">删除</a></li>
+            <li class="col08"><a href="javascript:;" sku_id="{{ sku.id }}">删除</a></li>
         </ul>
     {% endfor %}
     <ul class="settlements">
@@ -202,6 +202,25 @@
             }
         })
 
+        $('.col08').children('a').click(function () {
+            let sku_id = $(this).attr('sku_id')
+            let csrf = $('input[name="csrfmiddlewaretoken"]').val()
+            let params = {'sku_id': sku_id, 'csrfmiddlewaretoken': csrf}
+            // 获取商品所在的ul元素
+            sku_ul = $(this).parents('ul')
+            $.post('/cart/delete', params, function (data) {
+                if (data.res == 8) {
+                    sku_ul.remove()
+                    // 获取商品sku_ul的商品选中状态
+                    let is_chekced = sku_ul.find(':checkbox').prop('checked')
+                    if (is_chekced) {
+                        // 如果过选中，则更新数据
+                        update_page_info()
+                    }
+                    $('total_count').children('em').text(data.total_count)
+                }
+            })
+        })
     </script>
 
 {% endblock bottomfiles %}

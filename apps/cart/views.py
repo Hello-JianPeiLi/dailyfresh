@@ -116,7 +116,7 @@ class CartUpdateView(View):
         try:
             sku = GoodsSKU.objects.get(id=sku_id)
         except GoodsSKU.DoesNotExist:
-            return JsonResponse({'res': 1, 'msg': '数目出错'})
+            return JsonResponse({'res': 1, 'msg': '商品不存在'})
 
         # 更新购物车数量
         conn = get_redis_connection('default')
@@ -138,3 +138,31 @@ class CartUpdateView(View):
             total_count += int(count)
         print(total_count)
         return JsonResponse({'res': 6, 'total_count': total_count, 'msg': '更新成功'})
+
+
+# /cart/delete
+class CartDeleteView(View):
+    def post(self, request):
+        user = request.user
+        if not user.is_authenticated:
+            return JsonResponse({'res': 5, 'msg': '请先登录'})
+
+        sku_id = request.POST.get('sku_id')
+        if not sku_id:
+            return JsonResponse({'res': 0, 'msg': '数据不完整'})
+
+        try:
+            sku = GoodsSKU.objects.get(id=sku_id)
+        except GoodsSKU.DoesNotExist:
+            return JsonResponse({'res': 1, 'msg': '商品不存在'})
+
+        conn = get_redis_connection('default')
+        cart_key = 'cart_%s' % user.id
+        conn.hdel(cart_key, sku_id)
+
+        vals = conn.hvals(cart_key)
+        total_count = 0
+        for count in vals:
+            total_count += int(count)
+
+        return JsonResponse({'res': 8, 'total_count': total_count, 'msg': '删除成功'})
