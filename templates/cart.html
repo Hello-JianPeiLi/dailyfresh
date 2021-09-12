@@ -134,6 +134,50 @@
                 $('.total_count').find('em').text(total);
             }
         })
+
+        // 购物车商品减少（-）
+        $('.minus').click(function () {
+            // 获取商品的id和数量
+            let count = $(this).prev().val()
+            count = parseInt(count) - 1
+            let sku_id = $(this).prev().attr('sku_id')
+            let csrf = $('input[name="csrfmiddlewaretoken"]').val()
+            if (count <= 0) {
+                return
+            }
+            let params = {'count': count, 'sku_id': sku_id, 'csrfmiddlewaretoken': csrf}
+            console.log(params)
+            let error_updata = false
+            let total = 0
+            $.ajaxSettings.async = false
+            $.post('/cart/update', params, function (data) {
+                if (data.res == 6) {
+                    error_updata = false
+                    total = data.total_count
+                    console.log(total)
+                    console.log('更新成功')
+                } else {
+                    error_updata = true
+                    alert(data.msg)
+                }
+                $.ajaxSettings.async = true
+            });
+            // 判断更新是否成功
+            if (error_updata == false) {
+                // 重新设置商品的数目
+                $(this).prev().val(count)
+                // 计算商品的小计
+                update_goods_amount($(this).parents('ul'))
+                // 获取商品对应的checkbox的选中装填，如果被选中，更新页面信息
+                let is_checked = $(this).parents('ul').find(':checkbox').prop('checked')
+                console.log(is_checked)
+                if (is_checked) {
+                    // 更新页面
+                    update_page_info()
+                }
+                $('.total_count').find('em').text(total);
+            }
+        })
     </script>
 
 {% endblock bottomfiles %}
