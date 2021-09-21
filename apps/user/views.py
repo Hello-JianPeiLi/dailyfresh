@@ -13,6 +13,9 @@ from django.contrib.auth import authenticate, login, logout
 from utils.mixin import LoginRequireMixin
 from django_redis import get_redis_connection
 from apps.goods.models import GoodsSKU
+from apps.order.models import OrderInfo, OrderGoods
+from django.http import JsonResponse
+from django.core.paginator import Paginator
 
 
 # from celery_tasks.email_task import send_register_active_email
@@ -140,7 +143,7 @@ class IndexView(View):
     def get(self, request):
         return render(request, 'index.html')
 
-
+# /user/
 class UserInfoView(LoginRequireMixin, View):
     """用户中心信息页"""
 
@@ -179,9 +182,48 @@ class UserInfoView(LoginRequireMixin, View):
         return render(request, 'user_center_info.html', context)
 
 
+# user/order/page
 class UserOrderView(LoginRequireMixin, View):
-    def get(self, request):
-        return render(request, 'user_center_order.html')
+    def get(self, request, page):
+        user = request.user
+        orders = OrderInfo.objects.filter(user=user).order_by('-create_time')
+        if not user.is_authenticated:
+            return JsonResponse({'code': 403, 'msg': '用户未登录'})
+        for order in orders:
+            order_skus = OrderGoods.objects.filter(order_id=order.order_id)
+            order.status_name = OrderInfo.ORDER_STATUS[order.order_status]
+            for order_sku in order_skus:
+                # 计算小计
+                amonut = order_sku.price * order_sku.count
+                order_sku.amount = amonut
+            # 动态添加属性
+            order.order_skus = order_skus
+
+        # 分页
+        paginator = Paginator(orders, 1)
+        # 获取页面
+        try:
+            page = int(page)
+        except Exception as e:
+            page = 1
+        if page > paginator.num_pages:
+            page = 1
+        order_page = paginator.page(page)
+        num_pages = paginator.num_pages
+        if num_pages < 5:
+            pages = range(1, num_pages + 1)
+        elif page <= 3:
+            pages = range(1, 6)
+        elif num_pages - page <= 2:
+            pages = range(num_pages - 4, num_pages + 1)
+        else:
+            pages = range(page - 2, page + 3)
+
+        context = {
+            'order_page': order_page,
+            'pages': pages
+        }
+        return render(request, 'user_center_order.html', context)
 
 
 class UserAddressView(LoginRequireMixin, View):

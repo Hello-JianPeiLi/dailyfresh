@@ -227,8 +227,6 @@ class OrderCommitView(View):
                         transaction.savepoint_rollback(save_id)
                         return JsonResponse({'code': 309, 'msg': '商品不存在'})
                     print('user_id:%s，time:%s,stock:%s' % (user.id, i, sku.stock))
-                    import time
-                    time.sleep(10)
 
                     # 从redis中获取商品的数量
                     count = conn.hget(cart_key, sku_id)

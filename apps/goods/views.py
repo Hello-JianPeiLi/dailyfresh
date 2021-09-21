@@ -154,10 +154,8 @@ class ListView(View):
             page = int(page)
         except Exception as e:
             page = 1
-
         if page > paginator.num_pages:
             page = 1
-
         # 获取第page页的实例对象
         skus_page = paginator.page(page)
 

@@ -11,7 +11,7 @@ urlpatterns = [
     re_path('active/(?P<token>.*)/', ActiveView.as_view(), name='active'),  # 激活
     path('login/', LoginView.as_view(), name='login'),  # 登录
     path('logout/', LoginOutView.as_view(), name='logout'),  # 登出
-    path('order/', UserOrderView.as_view(), name='order'),  # 用户中心-订单
-    path('', UserInfoView.as_view(), name='index'),  # 用户中心-信息
+    re_path('^order/(?P<page>\d+)', UserOrderView.as_view(), name='order'),  # 用户中心-订单
+    re_path('^$', UserInfoView.as_view(), name='index'),  # 用户中心-信息
     path('address/', UserAddressView.as_view(), name='address'),  # 用户中心-地址
 ]
