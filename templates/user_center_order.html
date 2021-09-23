@@ -7,6 +7,7 @@
     <title>天天生鲜-用户中心</title>
     <link rel="stylesheet" type="text/css" href={% static "/css/reset.css" %}>
     <link rel="stylesheet" type="text/css" href={% static "/css/main.css" %}>
+    {% csrf_token %}
 </head>
 <body>
 <div class="header_con">
@@ -80,7 +81,7 @@
                     </td>
                     <td width="15%">{{ order.total_price|add:order.transit_price }}(含运费:{{ order.transit_price }})元</td>
                     <td width="15%">{{ order.status_name }}</td>
-                    <td width="15%"><a href="#" class="oper_btn">去付款</a></td>
+                    <td width="15%"><a href="#" order_id="{{ order.order_id }}" status="{{ order.order_status }}" class="oper_btn">去付款</a></td>
                 </tr>
                 </tbody>
             </table>
@@ -119,4 +120,33 @@
 </div>
 
 </body>
+<script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+<script type="text/javascript">
+    $('.oper_btn').click(function () {
+        status = $(this).attr('status')
+        if (status == 1) {
+            order_id = $(this).attr('order_id')
+            csrf = $('input[name="csrfmiddlewaretoken"]').val()
+            params = {'order_id': order_id, 'csrfmiddlewaretoken': csrf}
+            $.post('/order/pay', params, function (data) {
+                if (data.code == 125) {
+                    window.open(data.pay_url)
+                } else {
+                    alert(data.msg)
+                }
+            })
+        } else {
+            alert('奇台情况')
+        }
+    })
+</script>
 </html>
+
+
+
+
+
+
+
+
+
