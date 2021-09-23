@@ -81,7 +81,8 @@
                     </td>
                     <td width="15%">{{ order.total_price|add:order.transit_price }}(含运费:{{ order.transit_price }})元</td>
                     <td width="15%">{{ order.status_name }}</td>
-                    <td width="15%"><a href="#" order_id="{{ order.order_id }}" status="{{ order.order_status }}" class="oper_btn">去付款</a></td>
+                    <td width="15%"><a href="#" order_id="{{ order.order_id }}" status="{{ order.order_status }}"
+                                       class="oper_btn">去付款</a></td>
                 </tr>
                 </tbody>
             </table>
@@ -131,12 +132,20 @@
             $.post('/order/pay', params, function (data) {
                 if (data.code == 125) {
                     window.open(data.pay_url)
+                    // 浏览器访问/order/check接口获取支付结果
+                    $.post('/order/check', params, function (data) {
+                        if (data.code == 1) {
+                            // 支付成功
+                            alert('支付成功')
+                            location.reload()
+                        }
+                    });
                 } else {
                     alert(data.msg)
                 }
             })
         } else {
-            alert('奇台情况')
+            alert('其他情况')
         }
     })
 </script>

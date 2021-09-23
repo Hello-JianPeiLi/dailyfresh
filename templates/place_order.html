@@ -92,9 +92,7 @@
             $.post('/order/commit', params, function (data) {
                 if (data.code == 200) {
                     localStorage.setItem('order_finish', 2);
-
                     $('.popup_con').fadeIn('fast', function () {
-
                         setTimeout(function () {
                             $('.popup_con').fadeOut('fast', function () {
                                 window.location.href = '/user/order/1';
@@ -105,7 +103,6 @@
                     alert('下单失败' + data['msg'])
                 }
             })
-
         });
     </script>
 {% endblock bottomfiles %}

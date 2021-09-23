@@ -11,6 +11,9 @@ from datetime import datetime
 from django.db import transaction
 from alipay import AliPay, ISVAliPay
 from dailyfresh import settings
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 
 # Create your views here.
@@ -279,6 +282,7 @@ class OrderCommitView(View):
         return JsonResponse({'code': 200, 'msg': '结算成功'})
 
 
+# /order/pay
 class OrderPayView(View):
     def post(self, request):
         user = request.user
@@ -326,3 +330,75 @@ class OrderPayView(View):
         # 返回应答
         pay_url = 'https://openapi.alipaydev.com/gateway.do?' + order_string
         return JsonResponse({'code': 125, 'pay_url': pay_url})
+
+
+class CheckPayView(View):
+    def post(self, request):
+        user = request.user
+        if not user.is_authenticated:
+            return JsonResponse({'code': 929, 'msg': '请登录'})
+
+        order_id = request.POST.get('order_id')
+        if not order_id:
+            return JsonResponse({'code': 23, 'msg': '参数缺失'})
+
+        try:
+            order = OrderInfo.objects.get(order_id=order_id,
+                                          user=user)
+        except OrderInfo.DoesNotExist:
+            return JsonResponse({'code': 123, 'msg': '订单不存在'})
+
+        # 业务处理使用Python sdk调用支付宝支付接口
+        # 初始化
+        app_private_key_path = os.path.join(settings.BASE_DIR, 'apps/order/app_private_key.pem')
+        app_public_key_path = os.path.join(settings.BASE_DIR, 'apps/order/app_public_key.pem')
+        app_private_key_string = open(app_private_key_path, 'r').read()
+        app_public_key_string = open(app_public_key_path, 'r').read()
+        alipay = AliPay(
+            appid='2021000118621468',
+            app_notify_url=None,  # 默认回调url
+            app_private_key_string=app_private_key_string,
+            alipay_public_key_string=app_public_key_string,
+            sign_type='RSA2',
+            debug=True
+        )
+        # 调用支付包alipay.trade.query(统一收单线下交易查询)
+        response = alipay.api_alipay_trade_query(order_id)
+        """
+            "alipay_trade_query_response": {
+                "trade_no": "2017032121001004070200176844",
+                "code": "10000",
+                "invoice_amount": "20.00",
+                "open_id": "20880072506750308812798160715407",
+                "fund_bill_list": [
+                    {
+                        "amount": "20.00",
+                        "fund_channel": "ALIPAYACCOUNT"
+                    }
+                ],
+                "buyer_logon_id": "csq***@sandbox.com",
+                "send_pay_date": "2017-03-21 13:29:17",
+                "receipt_amount": "20.00",
+                "out_trade_no": "out_trade_no15",
+                "buyer_pay_amount": "20.00",
+                "buyer_user_id": "2088102169481075",
+                "msg": "Success",
+                "point_amount": "0.00",
+                "trade_status": "TRADE_SUCCESS",
+                "total_amount": "20.00"
+            }
+        """
+        print(response)
+        code = response.code
+        if code == '10000' and response.get('trade_status') == 'TRADE_SUCCESS':
+            # 支付成功
+            # 修改状态  1.待支付  2.待发货  3.待收货  4.待评价  5.已完成
+            order.order_status = 4
+            order.trade_no = response.get('trade_no')
+            return JsonResponse({'code': 1, 'msg': '支付成功'})
+        elif code == '10000' and response.get('trade_status') == 'WAIT_BUYER_PAY':
+            from time import sleep
+            sleep(5)
+        else:
+            print(response.get('code'))
+            return JsonResponse({'code': 4, 'msg': '支付失败'})
